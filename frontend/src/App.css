@@ -1,0 +1,76 @@
+/* Root container */
+#root {
+  max-width:800px; /* Smaller width for focus */
+  margin: 20px auto; /* Centering */
+  padding: 2rem;
+  color: #fff; /* Light text */
+  background: #333; /* Dark background */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Subtle shadow */
+}
+
+/* Typography */
+h1 {
+  font-family: 'Arial', sans-serif; /* Modern font */
+  color: #4CAF50; /* Accent color */
+}
+
+/* Form styling */
+form {
+  display: flex;
+  margin-top: 20px;
+}
+
+input[type="text"] {
+  padding: 10px;
+  margin-right: 8px;
+  border: none;
+  border-radius: 4px;
+  width: 65%; /* Responsive width */
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #4CAF50; /* Accent color */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.7em;
+  cursor: pointer; /* Pointer on hover */
+  transition: background-color 0.3s; /* Smooth transition */
+}
+
+button:hover {
+  background-color: #45a049; /* Darken color on hover */
+}
+
+/* Task list styling */
+ul {
+  list-style: none; /* Remove default list style */
+  padding: 0;
+}
+
+li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: #424242; /* Slightly lighter than background for contrast */
+  margin-top: 8px;
+  border-radius: 4px; /* Rounded corners */
+}
+
+/* Hover effect for tasks */
+li:hover {
+  background-color: #333333;
+}
+
+/* Make Delete buttons less prominent */
+li button {
+  background: none;
+  color: #f44336; /* Red color for delete */
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  padding: 2px 5px;
+}

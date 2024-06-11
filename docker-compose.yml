@@ -1,0 +1,53 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - '3001:3001'
+    volumes:
+      - ./backend:/app
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=mysql
+      - DB_USER=myuser
+      - DB_PASSWORD=mypassword
+      - DB_DATABASE=myappdb
+    # env_file:
+    #   - .env
+    depends_on:
+      - mysql
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - '3000:80'
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      - backend
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: myappdb
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+    # init.sql only executed if the MySQL container is started with an empty data directory
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+volumes:
+  mysql-data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: './mysql-data'
