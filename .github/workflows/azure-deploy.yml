@@ -55,6 +55,7 @@ jobs:
           MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
           MYSQL_USER: ${{ secrets.MYSQL_USER }}
           MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          WEBAPP_STORAGE_HOME: /home
         run: |
           docker-compose -f docker-compose.yml build
           docker-compose -f docker-compose.yml push

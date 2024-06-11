@@ -8,8 +8,8 @@ services:
     ports:
       - '3001:3001'
     volumes:
-      - ./backend:/app
-      - myfileshare:/app/data
+      - ${WEBAPP_STORAGE_HOME}/backend:/app
+      - ${WEBAPP_STORAGE_HOME}/myfileshare:/app/data
     environment:
       - NODE_ENV=production
       - DB_HOST=mysql
@@ -26,7 +26,7 @@ services:
     ports:
       - '80:80'
     volumes:
-      - ./frontend:/app
+      - ${WEBAPP_STORAGE_HOME}/frontend:/app
     depends_on:
       - backend
 
@@ -41,7 +41,7 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ${WEBAPP_STORAGE_HOME}/init.sql:/docker-entrypoint-initdb.d/init.sql
     command: --default-authentication-plugin=mysql_native_password
     restart: always
 
