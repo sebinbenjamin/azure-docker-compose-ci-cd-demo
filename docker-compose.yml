@@ -4,7 +4,11 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
+    image: demofsappregistry.azurecr.io/azure-docker-compose-ci-cd-demo_frontend:latest
     ports:
       - '80:80'
     restart: always
+    environment:
+      NODE_ENV: production
+      
