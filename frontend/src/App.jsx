@@ -9,7 +9,8 @@ function App() {
     fetchTodos();
   }, []);
 
-  const API_ENDPOINT = 'http://localhost:3001/todos'
+  const API_ENDPOINT = `${import.meta.env.VITE_API_ENDPOINT}/todos`;
+  console.log(API_ENDPOINT);
   const fetchTodos = async () => {
     const response = await fetch(API_ENDPOINT);
     const data = await response.json();

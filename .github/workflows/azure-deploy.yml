@@ -48,6 +48,7 @@ jobs:
 
       - name: Build and push Docker images
         env:
+          VITE_API_ENDPOINT: 'http://demo-fs-app.azurewebsites.net:3001'
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_DATABASE: ${{ secrets.DB_DATABASE }}

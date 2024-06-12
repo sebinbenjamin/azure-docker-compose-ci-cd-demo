@@ -28,7 +28,7 @@ To deploy a multi-container Docker application to Azure using GitHub Actions, yo
 2. Create an Azure Web App for Containers `az webapp create --resource-group demo-fs-appResources --plan myDemoAppPlan --name demo-fs-app --multicontainer-config-type compose --multicontainer-config-file docker-compose.yml
 `
 
-## MUST DO: Add ACR Pull Role to Web App's managed identity
+## TODO: Add ACR Pull Role to Web App's managed identity
 1. Enable system-assigned managed identity for the Web app `az webapp identity assign --name demo-fs-app --resource-group demo-fs-appResources`
 2. Find the principle ID `az webapp identity show --name demo-fs-app --resource-group demo-fs-appResources --query principalId --output tsv`
 3. Find out the ACR resource ID by running `az acr show --name demofsappregistry --query id --output tsv`
@@ -43,6 +43,7 @@ To deploy a multi-container Docker application to Azure using GitHub Actions, yo
 ### Update the settings to allow multiple ports in the container
 Run the config command to allow the extra set of ports based on you requirement. For instance, 
 ```az webapp config appsettings set --resource-group <group-name> --name <app-name> --settings WEBSITES_PORT=80,3001,3306```
+
 
 ### Credential setup in Github Actions Secrets
 
