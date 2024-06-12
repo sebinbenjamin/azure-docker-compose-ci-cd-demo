@@ -3,6 +3,12 @@
 FROM node:alpine AS build
 WORKDIR /app
 COPY package*.json ./
+
+# Accept the build argument
+ARG VITE_API_ENDPOINT
+
+# Set it as an environment variable in the image
+ENV VITE_API_ENDPOINT=$VITE_API_ENDPOINT
 RUN npm ci
 COPY . .
 RUN npm run build

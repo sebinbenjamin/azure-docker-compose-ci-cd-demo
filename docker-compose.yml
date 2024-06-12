@@ -5,6 +5,8 @@ services:
     build:
       context: ./frontend
       dockerfile: dockerfile
+      args:
+        VITE_API_ENDPOINT: 'https://demo-fs-app.azurewebsites.net:3001'
     image: demofsappregistry.azurecr.io/azure-docker-compose-ci-cd-demo_frontend:latest
     ports:
       - '80:80'
