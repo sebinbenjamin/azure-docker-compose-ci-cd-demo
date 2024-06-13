@@ -38,7 +38,7 @@ jobs:
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_DATABASE: ${{ secrets.DB_DATABASE }}
-          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_IN_PASSWORD }}
           MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
           MYSQL_USER: ${{ secrets.MYSQL_USER }}
           MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
@@ -47,13 +47,20 @@ jobs:
           docker-compose -f docker-compose.yml build
           docker-compose -f docker-compose.yml push
 
-      - name: Deploy to Azure Container Instances
+      - name: Make sure subscription is registered for the provider
         run: |
-          az container create \
-          --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-          --name demo-fs-multi-container-app \
-          --file docker-compose.yml \
-          --registry-login-server demofsappregistry.azurecr.io \
-          --registry-username ${{ secrets.REGISTRY_USERNAME }} \
-          --registry-password ${{ secrets.REGISTRY_PASSWORD }}
-          
+          az provider register -n Microsoft.App --wait
+
+      - name: Enable CLI Extension for compose create
+        run: |
+          az config set extension.use_dynamic_install=yes_without_prompt
+
+      - name: Deploy to Azure Container Apps
+        run: |
+          az containerapp compose create \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --compose-file-path docker-compose.yml \
+            --registry-server ${{ secrets.REGISTRY_LOGIN_SERVER }} \
+            --registry-username ${{ secrets.REGISTRY_USERNAME }} \
+            --registry-password ${{ secrets.REGISTRY_PASSWORD }} \
+            --location ${{ secrets.AZURE_LOCATION }}
