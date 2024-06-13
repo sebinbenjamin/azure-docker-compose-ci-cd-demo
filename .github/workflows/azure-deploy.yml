@@ -22,22 +22,9 @@ jobs:
         run: |
           az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Create Azure Storage Account
+      - name: Create Azure Resource Group
         run: |
-          az storage account create --name demodockerappstorage --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --location ${{ secrets.AZURE_LOCATION }} --sku Standard_LRS
-
-      - name: Retrieve Storage Account Key
-        id: get-storage-key
-        run: |
-          echo "STORAGE_KEY=$(az storage account keys list --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --account-name demodockerappstorage --query '[0].value' --output tsv)" >> $GITHUB_ENV
-
-      - name: Create Azure File Share
-        run: |
-          az storage share create --name demoappfileshare --account-name demodockerappstorage --account-key ${{ env.STORAGE_KEY }}
-
-      - name: Set up Azure File Share volume in Web App settings
-        run: |
-          az webapp config appsettings set --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ secrets.AZURE_WEBAPP_NAME }} --settings AZURE_STORAGE_ACCOUNT_KEY=${{ env.STORAGE_KEY }}
+          az group create --name ${{ secrets.AZURE_RESOURCE_GROUP }} --location ${{ secrets.AZURE_LOCATION }}
 
       - name: Log in to Azure Container Registry
         uses: azure/docker-login@v2
@@ -60,18 +47,13 @@ jobs:
           docker-compose -f docker-compose.yml build
           docker-compose -f docker-compose.yml push
 
-      - name: Create Azure Resource Group
+      - name: Deploy to Azure Container Instances
         run: |
-          az group create --name ${{ secrets.AZURE_RESOURCE_GROUP }} --location ${{ secrets.AZURE_LOCATION }}
-
-      - name: Create Azure App Service Plan
-        run: |
-          az appservice plan create --name ${{ secrets.AZURE_APP_SERVICE_PLAN }} --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --sku B1 --is-linux
-
-      - name: Create Azure Web App for Containers
-        run: |
-          az webapp create --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --plan ${{ secrets.AZURE_APP_SERVICE_PLAN }} --name ${{ secrets.AZURE_WEBAPP_NAME }} --multicontainer-config-type compose --multicontainer-config-file docker-compose.yml
-
-      - name: Configure Azure Web App with Docker Compose
-        run: |
-          az webapp config container set --name ${{ secrets.AZURE_WEBAPP_NAME }} --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --multicontainer-config-type compose --multicontainer-config-file docker-compose.yml
+          az container create \
+          --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+          --name demo-fs-multi-container-app \
+          --file docker-compose.yml \
+          --registry-login-server demofsappregistry.azurecr.io \
+          --registry-username ${{ secrets.REGISTRY_USERNAME }} \
+          --registry-password ${{ secrets.REGISTRY_PASSWORD }}
+          

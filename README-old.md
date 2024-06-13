@@ -1,9 +1,9 @@
 ## Deploying a docker-compose app to Azure
 To deploy a multi-container Docker application to Azure using GitHub Actions, you'll need to set up several components:
 
-- **Azure Container Registry (ACR):** To store your Docker images.
-- **Azure Container Instances (ACI):** To run your Docker containers. Note: Azure web apps is a different service, which is limited at the moment. It can only expose a single port.
-- **GitHub Actions:** To automate the Docker image build and deployment process to ACI.
+- Azure Container Registry (ACR): To store your Docker images.
+- Azure Web App: To run your Docker containers.
+- GitHub Actions: To automate the build and deployment process.
 
 ### Obtaining the Azure credentials
 1. Install the Azure CLI and make sure you've logged in using `az login`. Also make sure you've se the right subscription as default `az account list --output table`
@@ -21,9 +21,11 @@ To deploy a multi-container Docker application to Azure using GitHub Actions, yo
 
 7. Find the registry username & password `az acr credential show --name demofsappregistry --query username --output tsv` and `az acr credential show --name demofsappregistry --query "passwords[0].value" --output tsv`
 
-## Create an ACI instance with your Docker Compose configuration
+## Creating the Azure app service plan and Azure web app for container
 
-1. az container create --resource-group demo-aci-appResources --name demo-aci-app --image myImage --registry-login-server demoaciappregistry.azurecr.io --registry-username <acr-username> --registry-password <acr-password> --dns-name-label demo-aci-app-dns --ports 80 443
+1. Create an app service plan `az appservice plan create --name myDemoAppPlan --resource-group demo-fs-appResources --sku B1 --is-linux --location australiaeast`
+
+2. Create an Azure Web App for Containers `az webapp create --resource-group demo-fs-appResources --plan myDemoAppPlan --name demo-fs-app --multicontainer-config-type compose --multicontainer-config-file docker-compose.yml
 `
 
 ## TODO: Add ACR Pull Role to Web App's managed identity
@@ -38,6 +40,11 @@ To deploy a multi-container Docker application to Azure using GitHub Actions, yo
 2. Grab the account key for use in the next step `az storage account keys list --resource-group demo-fs-appResources --account-name demodockerappstorage --query '[0].value' --output tsv`
 3. Create a file share within the storage account `az storage share create --name demoappfileshare --account-name demodockerappstorage --account-key abcd1234`
 
+### Update the settings to allow multiple ports in the container
+Run the config command to allow the extra set of ports based on you requirement. For instance, 
+```az webapp config appsettings set --resource-group <group-name> --name <app-name> --settings WEBSITES_PORT=80,3001,3306```
+
+
 ### Credential setup in Github Actions Secrets
 
 AZURE_CREDENTIALS: The JSON output from az ad sp create-for-rbac.
@@ -45,13 +52,12 @@ REGISTRY_LOGIN_SERVER: The login server of your ACR, e.g., myRegistry.azurecr.io
 REGISTRY_USERNAME: The username for your ACR.
 REGISTRY_PASSWORD: The password for your ACR.
 AZURE_RESOURCE_GROUP: The name of your Azure resource group.
+AZURE_APP_SERVICE_PLAN: The name you want to assign to your Azure App Service plan.
+AZURE_WEBAPP_NAME: The name you want to assign to your Azure Web App.
 AZURE_LOCATION: The region you want to use (e.g., australiaeast).
-DNS_NAME_LABEL: DNS name label for the ACI deployment, e.g., `demo-aci-app-dns`
 
 ### Helpful script to debug
-`az container logs --resource-group demo-aci-appResources --name demo-aci-app`
-`az container show --resource-group demo-aci-appResources --name demo-aci-app --query 'containers[0].instanceView.events' --output table`
+`az webapp log tail --name demo-fs-app --resource-group demo-fs-appResources`
+`az webapp log tail --name demo-fs-app --resource-group demo-fs-appResources --provider docker`
 
-## Cleanup
-
-Delete the Container Instance `az container delete --resource-group demo-aci-appResources --name demo-aci-app --yes`
+az webapp config container set  --name demo-fs-app --resource-group demo-fs-appResources --multicontainer-config-type --settings SOMEENV="somevalue" compose --settings WEBSITES_ENABLE_APP_SERVICE_STORAGE=TRUE --multicontainer-config-file docker-compose.yml
